@@ -1,6 +1,7 @@
 import { Element, load } from 'cheerio';
 import axios from 'axios';
 import { Player } from '../models/player';
+import Skill from '../emums/skill';
 
 const toUser = (ele: Element): Player => {
   const $ = load(ele);
@@ -11,12 +12,10 @@ const toUser = (ele: Element): Player => {
   if (deathNote) {
     diedAt = new Date(Date.parse(deathNote.split('died:')[1].trim()));
   }
-  const { href } = player.attr();
   const username = player.text();
   return {
     username,
-    link: href,
-    rank: parseInt(rank, 10),
+    overall: parseInt(rank, 10),
     diedAt,
   };
 };
@@ -26,13 +25,16 @@ export default class Highscores {
 
   private page: number;
 
-  constructor() {
+  private skill: Skill;
+
+  constructor(skill: Skill) {
     this.page = 1;
+    this.skill = skill;
   }
 
   async read() {
     const contentBuffer = await axios
-      .get(`${Highscores.baseURL}/m=hiscore_oldschool_hardcore_ironman/overall?table=0&page=${this.page}`, { headers: { 'Content-Type': 'application/json' }, responseType: 'arraybuffer' });
+      .get(`${Highscores.baseURL}/m=hiscore_oldschool_hardcore_ironman/overall?table=${this.skill}&page=${this.page}`, { headers: { 'Content-Type': 'application/json' }, responseType: 'arraybuffer' });
     // Encoding doesn't work when parsing as utf8, so parse as ascii
     const content = contentBuffer.data.toString('ascii');
     const $ = load(content);

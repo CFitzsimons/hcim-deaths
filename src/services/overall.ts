@@ -1,7 +1,8 @@
 import Highscores from '../classes/highscores';
+import Skill from '../emums/skill';
 
-const topOneThousand = async () => {
-  const highscoreCrawler = new Highscores();
+const topOneThousand = async (skill = Skill.OVERALL) => {
+  const highscoreCrawler = new Highscores(skill);
   let totalFetched = 0;
   const limit = 100;
   const playersPerPage = 25;
