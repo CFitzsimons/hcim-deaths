@@ -19,11 +19,11 @@ const crawlSkillRecords = async (skill = Skill.OVERALL, totalRecords = 100) => {
   return allPlayerRecords;
 };
 
-const topOneHundred = async () => {
+const crawlKillRecords = async () => {
 
 };
 
 export {
   crawlSkillRecords,
-  topOneHundred,
+  crawlKillRecords,
 };

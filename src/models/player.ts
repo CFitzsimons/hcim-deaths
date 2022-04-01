@@ -11,7 +11,11 @@ export type Player = {
 
 const toSQLDate = (date: Date | null) => date?.toJSON().slice(0, 19).replace('T', ' ');
 
-const fromSQLDate = (date: string | null) => {
+const fromSQLDate = (date: string | Date | null) => {
+  if (typeof date === 'object') {
+    // Already converted
+    return date;
+  }
   if (!date) {
     return null;
   }
@@ -47,16 +51,26 @@ const upsertPlayer = async (record: Player, transaction: Knex.Transaction) => {
     .transacting(transaction);
 };
 
-const upsertPlayers = async (records: Player[]) => {
-  const trx = await knex.transaction();
+const upsertPlayersWithTransaction = async (records: Player[], trx: Knex.Transaction) => {
   try {
     await Promise.all(records.map((record) => upsertPlayer(record, trx)));
-    await trx.commit();
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
-    await trx.rollback();
+    return false;
   }
+  return true;
+};
+
+const upsertPlayers = async (records: Player[]) => {
+  const trx = await knex.transaction();
+  const success = await upsertPlayersWithTransaction(records, trx);
+  if (!success) {
+    await trx.rollback();
+    console.error('Failed to update players');
+    process.exit(1);
+  }
+  trx.commit();
 };
 
 const batchUpsert = async (records: Player[]) => {
@@ -70,13 +84,28 @@ const batchUpsert = async (records: Player[]) => {
   }
 };
 
-const findAll = async (): Promise<Player[]> => {
-  const players = await knex('Player')
+type PlayerSearch = {
+  usernames?: string[];
+}
+
+const search = async (query: Knex.QueryBuilder, searchQuery: PlayerSearch): Promise<Player[]> => {
+  const {
+    usernames,
+  } = searchQuery || {};
+  if (usernames) {
+    query
+      .whereIn('username', usernames);
+  }
+  return (await query) as Player[];
+};
+
+const findAll = async (searchQuery = {} as PlayerSearch): Promise<Player[]> => {
+  const query = knex('Player')
     .select('*');
+  const players = await search(query, searchQuery);
   return players.map((player) => ({
-    username: player.username,
+    ...player,
     diedAt: fromSQLDate(player.diedAt),
-    rank: player.position,
   }));
 };
 
@@ -84,5 +113,6 @@ export {
   batchUpsert,
   upsertPlayers,
   upsertPlayer,
+  upsertPlayersWithTransaction,
   findAll,
 };
