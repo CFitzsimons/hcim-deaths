@@ -1,4 +1,6 @@
 import { Knex } from 'knex';
+
+import logger from '../config/logger';
 import knex from '../config/knex';
 
 export type Player = {
@@ -67,7 +69,7 @@ const upsertPlayers = async (records: Player[]) => {
   const success = await upsertPlayersWithTransaction(records, trx);
   if (!success) {
     await trx.rollback();
-    console.error('Failed to update players');
+    logger.error('Failed to update players');
     process.exit(1);
   }
   trx.commit();
@@ -77,10 +79,10 @@ const batchUpsert = async (records: Player[]) => {
   const BATCH_SIZE = 20;
   for (let i = 0; i < records.length; i += BATCH_SIZE) {
     const batch = records.slice(i, Math.min(i + BATCH_SIZE, records.length));
-    console.info(`Starting to insert ${BATCH_SIZE} records into the DB.`);
+    logger.info(`Starting to insert ${BATCH_SIZE} records into the DB.`);
     // eslint-disable-next-line no-await-in-loop
     await upsertPlayers(batch);
-    console.info(`Finshed inserting ${BATCH_SIZE} records into the DB.`);
+    logger.info(`Finshed inserting ${BATCH_SIZE} records into the DB.`);
   }
 };
 

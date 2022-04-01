@@ -27,33 +27,31 @@ const mergePlayers = (allRecords: Player[]): Player[] => {
  * job for actual deployment.
  */
 const main = async () => {
-  const crawlers = [
-    crawlSkillRecords(),
-    crawlSkillRecords(Skill.AGILITY),
-    crawlSkillRecords(Skill.ATTACK),
-    crawlSkillRecords(Skill.CONSTRUCTION),
-    crawlSkillRecords(Skill.COOKING),
-    crawlSkillRecords(Skill.CRAFTING),
-    crawlSkillRecords(Skill.DEFENCE),
-    crawlSkillRecords(Skill.FARMING),
-    crawlSkillRecords(Skill.FIREMAKING),
-    crawlSkillRecords(Skill.FISHING),
-    crawlSkillRecords(Skill.FLETCHING),
-    crawlSkillRecords(Skill.HERBLORE),
-    crawlSkillRecords(Skill.HITPOINTS),
-    crawlSkillRecords(Skill.HUNTER),
-    crawlSkillRecords(Skill.MAGIC),
-    crawlSkillRecords(Skill.MINING),
-    crawlSkillRecords(Skill.PRAYER),
-    crawlSkillRecords(Skill.RANGED),
-    crawlSkillRecords(Skill.RUNECRAFTING),
-    crawlSkillRecords(Skill.SLAYER),
-    crawlSkillRecords(Skill.SMITHING),
-    crawlSkillRecords(Skill.STRENGTH),
-    crawlSkillRecords(Skill.THIEVING),
-    crawlSkillRecords(Skill.WOODCUTTING),
-  ];
-  const allPlayers = await Promise.all(crawlers);
+  const allPlayers = [];
+  allPlayers.push(await crawlSkillRecords(Skill.OVERALL, 1000));
+  allPlayers.push(await crawlSkillRecords(Skill.AGILITY));
+  allPlayers.push(await crawlSkillRecords(Skill.ATTACK));
+  allPlayers.push(await crawlSkillRecords(Skill.CONSTRUCTION));
+  allPlayers.push(await crawlSkillRecords(Skill.COOKING));
+  allPlayers.push(await crawlSkillRecords(Skill.CRAFTING));
+  allPlayers.push(await crawlSkillRecords(Skill.DEFENCE));
+  allPlayers.push(await crawlSkillRecords(Skill.FARMING));
+  allPlayers.push(await crawlSkillRecords(Skill.FIREMAKING));
+  allPlayers.push(await crawlSkillRecords(Skill.FISHING));
+  allPlayers.push(await crawlSkillRecords(Skill.FLETCHING));
+  allPlayers.push(await crawlSkillRecords(Skill.HERBLORE));
+  allPlayers.push(await crawlSkillRecords(Skill.HITPOINTS));
+  allPlayers.push(await crawlSkillRecords(Skill.HUNTER));
+  allPlayers.push(await crawlSkillRecords(Skill.MAGIC));
+  allPlayers.push(await crawlSkillRecords(Skill.MINING));
+  allPlayers.push(await crawlSkillRecords(Skill.PRAYER));
+  allPlayers.push(await crawlSkillRecords(Skill.RANGED));
+  allPlayers.push(await crawlSkillRecords(Skill.RUNECRAFTING));
+  allPlayers.push(await crawlSkillRecords(Skill.SLAYER));
+  allPlayers.push(await crawlSkillRecords(Skill.SMITHING));
+  allPlayers.push(await crawlSkillRecords(Skill.STRENGTH));
+  allPlayers.push(await crawlSkillRecords(Skill.THIEVING));
+  allPlayers.push(await crawlSkillRecords(Skill.WOODCUTTING));
   const updatablePlayers = mergePlayers(allPlayers.flat());
   const notifablePlayers = notifyRecentDeaths(updatablePlayers);
   const trx = await knex.transaction();
