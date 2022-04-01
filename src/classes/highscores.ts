@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Player } from '../models/player';
 import Skill from '../emums/skill';
 
-const toUser = (ele: Element): Player => {
+const toUser = (ele: Element, skill: Skill): Player => {
   const $ = load(ele);
+  const skillName = Skill[skill].toLowerCase();
   const player = $('a');
   const rank = $('td').first().text();
   const deathNote = $('img').attr('title');
@@ -15,7 +16,7 @@ const toUser = (ele: Element): Player => {
   const username = player.text();
   return {
     username,
-    overall: parseInt(rank, 10),
+    [skillName]: parseInt(rank, 10),
     diedAt,
   };
 };
@@ -39,7 +40,7 @@ export default class Highscores {
     const content = contentBuffer.data.toString('ascii');
     const $ = load(content);
     const rows = $(('.personal-hiscores__row'));
-    const players = rows.map((i, ele) => toUser(ele));
+    const players = rows.map((i, ele) => toUser(ele, this.skill));
     return players;
   }
 

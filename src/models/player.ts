@@ -59,8 +59,19 @@ const upsertPlayers = async (records: Player[]) => {
   }
 };
 
+const batchUpsert = async (records: Player[]) => {
+  const BATCH_SIZE = 20;
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, Math.min(i + BATCH_SIZE, records.length));
+    console.info(`Starting to insert ${BATCH_SIZE} records into the DB.`);
+    // eslint-disable-next-line no-await-in-loop
+    await upsertPlayers(batch);
+    console.info(`Finshed inserting ${BATCH_SIZE} records into the DB.`);
+  }
+};
+
 const findAll = async (): Promise<Player[]> => {
-  const players = await knex('Overall')
+  const players = await knex('Player')
     .select('*');
   return players.map((player) => ({
     username: player.username,
@@ -70,6 +81,7 @@ const findAll = async (): Promise<Player[]> => {
 };
 
 export {
+  batchUpsert,
   upsertPlayers,
   upsertPlayer,
   findAll,

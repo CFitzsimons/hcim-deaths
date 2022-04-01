@@ -1,20 +1,22 @@
 import Highscores from '../classes/highscores';
 import Skill from '../emums/skill';
+import { Player } from '../models/player';
 
-const topOneThousand = async (skill = Skill.OVERALL) => {
+const RECORDS_PER_PAGE = 25;
+
+const crawlSkillRecords = async (skill = Skill.OVERALL, totalRecords = 100) => {
+  console.info(`Attempting to find the top ${totalRecords} records for ${Skill[skill]}`);
   const highscoreCrawler = new Highscores(skill);
-  let totalFetched = 0;
-  const limit = 100;
-  const playersPerPage = 25;
-  const allPlayers = [];
-  while (limit - totalFetched > 0) {
+  const pagesRequired = Math.floor(totalRecords / RECORDS_PER_PAGE);
+  const allPlayerRecords: Player[] = [];
+  for (let i = 0; i < pagesRequired; i += 1) {
     // eslint-disable-next-line no-await-in-loop
-    const recordsForPage = await highscoreCrawler.read();
-    allPlayers.push(...recordsForPage);
+    const pageOfPlayers = await highscoreCrawler.read();
+    allPlayerRecords.push(...pageOfPlayers);
     highscoreCrawler.nextPage();
-    totalFetched += playersPerPage;
   }
-  return allPlayers;
+  console.info(`Found a total of ${allPlayerRecords.length} records for ${Skill[skill]}`);
+  return allPlayerRecords;
 };
 
 const topOneHundred = async () => {
@@ -22,6 +24,6 @@ const topOneHundred = async () => {
 };
 
 export {
-  topOneThousand,
+  crawlSkillRecords,
   topOneHundred,
 };
